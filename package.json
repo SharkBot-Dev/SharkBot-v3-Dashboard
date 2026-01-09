@@ -3,21 +3,26 @@
     "@fastify/autoload": "^6.3.1",
     "@fastify/oauth2": "^8.1.2",
     "@fastify/secure-session": "^8.3.0",
+    "@fastify/view": "^11.1.1",
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
     "fastify": "^5.6.2",
     "fastify-plugin": "^5.1.0",
     "mongodb": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3"
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^25.0.3",
+    "copyfiles": "^2.4.1"
   },
   "name": "sharkbot-v3-dashboard",
   "version": "1.0.0",
   "description": "本格的なダッシュボードBot",
   "main": "index.js",
   "scripts": {
-    "run": "node --env-file=.env dist/index.js"
+    "run": "node --env-file=.env dist/index.js",
+    "build": "tsc && copy.bat"
   },
   "keywords": [],
   "author": "",

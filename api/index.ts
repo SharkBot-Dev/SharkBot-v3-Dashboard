@@ -7,6 +7,8 @@ import { mongo } from "../lib/mongo.js";
 import { fileURLToPath } from "url";
 import session from "./plugins/session.js";
 import discord from "./plugins/discord.js";
+import authGuard from "./plugins/auth-guard.js";
+import view from "./plugins/view.js";
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -17,10 +19,12 @@ declare module 'fastify' {
 export default async function buildServer() {
     const fastify = Fastify({ logger: true });
 
-    fastify.register(moduleRoutes, { prefix: "/api/modules" });
-
     fastify.register(session);
     fastify.register(discord);
+    fastify.register(authGuard);
+    fastify.register(view);
+
+    fastify.register(moduleRoutes, { prefix: "/" });
 
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
@@ -55,6 +59,13 @@ export default async function buildServer() {
         request.session.set('userId', user.id);
 
         return reply.redirect('/');
+    });
+
+    // 404エラー対策
+    fastify.setNotFoundHandler((request, reply) => {
+        return reply.status(404).view('errors/404.ejs', {
+            title: "404"
+        });
     });
     
     return fastify;
