@@ -50,6 +50,35 @@ export default async function (fastify: FastifyInstance) {
         });
     });
 
+    fastify.delete("/api/guilds/:guildId/welcome", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {
+        const { guildId } = request.params as { guildId: string };
+        const { title, description, channel } = request.body as { title: string, description: string, channel: string };
+
+        const userId = request.session.get('userId');
+        if (!userId) {
+            return reply.status(401).send({ error: 'ログインが必要です' });
+        }
+
+        const dbUser = await mongo.db("DashboardBot").collection('GuildsList').findOne({ user: userId });
+
+        if (!dbUser || !dbUser.guilds) {
+            return reply.status(404).send({ error: 'サーバーリストが見つかりません。' });
+        }
+
+        const targetGuild = dbUser.guilds.find((g: any) => g.id === guildId);
+        
+        if (!targetGuild) {
+            return reply.status(403).send({ error: '指定されたサーバーへのアクセス権限がありません。' });
+        }
+
+        const db = mongo.db("Main").collection("WelcomeMessage");
+        await db.deleteOne({
+            Guild: new Long(guildId)
+        })
+
+        return { success: true };
+    });
+
     fastify.post("/api/guilds/:guildId/welcome", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {
         const { guildId } = request.params as { guildId: string };
         const { title, description, channel } = request.body as { title: string, description: string, channel: string };

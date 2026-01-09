@@ -85,6 +85,15 @@
                 body: JSON.stringify({ guildId, module: moduleName })
             });
 
+            const title_value = document.getElementById("join_message_title").value = "";
+            const description_value = document.getElementById("join_message_description").value = "";
+
+            await fetch(`/api/guilds/${guildId}/welcome`, {
+                method: "DELETE",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guildId })
+            });
+
             if (!response.ok) throw new Error('保存に失敗しました');
         } catch (err) {
             alert('設定の保存中にエラーが発生しました');
