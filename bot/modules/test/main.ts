@@ -9,7 +9,6 @@ export default {
         {
             name: Events.MessageCreate,
             execute: async (client, message) => {
-                console.log(message)
                 if (message.author.bot) {
                     return;
                 }
