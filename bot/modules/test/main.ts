@@ -1,5 +1,6 @@
 import { Client, Events, Message } from "discord.js";
 import type { ModuleType } from "./../type.js";
+import { moduleManager } from "./../../moduleManager.js";
 
 export default {
     name: "testmodule",
@@ -12,6 +13,10 @@ export default {
                 if (message.author.bot) {
                     return;
                 }
+
+                if (!message.guild) return;
+
+                if (!moduleManager.isEnabled(message.guild.id, "testmodule")) return;
 
                 if (message.content == "test") {
                     await message.reply('Test.')

@@ -21,7 +21,8 @@ export default async function buildServer() {
             auth: fastifyOauth2.DISCORD_CONFIGURATION
         },
         startRedirectPath: '/login',
-        callbackUri: 'http://localhost:3000/callback'
+        callbackUri: 'http://localhost:3000/callback',
+        scope: ['identify', 'guilds']
     } as FastifyOAuth2Options);
 
     fastify.get('/callback', async (request, reply) => {
