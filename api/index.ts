@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import moduleRoutes from "./routes/modules.js";
+import indexRoutes from "./routes/index.js";
 import oauthPlugin, { fastifyOauth2, type FastifyOAuth2Options, type OAuth2Namespace } from '@fastify/oauth2';
 import autoLoad from '@fastify/autoload';
 import path, { join } from "path";

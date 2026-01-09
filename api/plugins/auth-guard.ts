@@ -9,13 +9,17 @@ export default fp(async (fastify) => {
             return reply.status(401).send({ error: 'ログインが必要です' });
         }
 
-        const { guildId } = (request.body as any) || (request.params as any);
+        const params = request.params as any;
+        const body = request.body as any;
+        const query = request.query as any;
+
+        const guildId = params?.guildId || body?.guildId || query?.guildId;
 
         const dbUser = await mongo.db("DashboardBot").collection('GuildsList').findOne({ user: userId });
         const targetGuild = dbUser?.guilds?.find((g: any) => g.id === guildId);
 
         if (!targetGuild) {
-            return reply.status(403).send({ error: 'サーバーに所属していません' });
+            return reply.status(403).send({ error: '管理者権限がありません' });
         }
 
         const isAdmin = targetGuild.owner || (BigInt(targetGuild.permissions) & BigInt(0x8));
