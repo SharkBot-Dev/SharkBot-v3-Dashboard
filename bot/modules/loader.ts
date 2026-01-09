@@ -3,6 +3,7 @@ import path from 'node:path';
 import { Client } from 'discord.js';
 import type { ModuleType } from './type.js';
 import { fileURLToPath, pathToFileURL } from "url";
+import { addModules, modules } from "./../temps/modules.js";
 
 export async function loadModules(client: Client) {
     const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +32,9 @@ export async function loadModules(client: Client) {
         
         try {
             const moduleExport = await import(pathToFileURL(filePath).href);
+            
+            addModules(moduleExport.default);
+
             // console.log(moduleExport)
             console.log(`[Module] ${moduleExport.default.name} をロードしました。`)
             const botModule: ModuleType = moduleExport.default || Object.values(moduleExport)[0];

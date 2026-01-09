@@ -8,6 +8,7 @@ export interface ModuleEvent<K extends keyof ClientEvents> {
 
 export interface ModuleType {
     name: string,
+    pathname: string,
     description: string,
     enabled: boolean,
     commands?: {
@@ -15,4 +16,5 @@ export interface ModuleType {
         execute: (interaction: ChatInputCommandInteraction) => Promise<void> | void;
     }[];
     events?: ModuleEvent<any>[];
+    emoji: string;
 }

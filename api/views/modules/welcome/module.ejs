@@ -1,0 +1,53 @@
+<%- include('../modules.ejs') %>
+
+<style>
+    .card textarea {
+        width: 80px;
+        height: 50px;
+    }
+</style>
+
+<div class="main-content">
+    <header style="margin-bottom: 30px;">
+        <h1 style="margin: 0;">よろしくメッセージ</h1>
+    </header>
+
+    <div class="card">
+        <h3>
+            参加メッセージの指定
+        </h3>
+
+        <p>
+            <h4>送信先チャンネル</h4>
+            <select id="channel">
+                <% channels.forEach(ch => { %>
+                    <option value="<%= ch.id %>"><%= ch.name %></option>
+                <% }); %>
+            </select>
+            <h4>埋め込みのタイトル</h4>
+            <textarea class="" id="join_message_title">
+                <%= msg_title %>
+            </textarea>
+            <h4>埋め込みの説明</h4>
+            <textarea class="" id="join_message_description">
+                <%= msg_description %>
+            </textarea>
+            <br/>
+            <button onclick="updateJoinMessage()">更新</button>
+        </p>
+    </div>
+</div>
+<script>
+    async function updateJoinMessage() {
+        const guildId = "<%= guild.id %>";
+        const title_value = document.getElementById("join_message_title").value;
+        const description_value = document.getElementById("join_message_description").value;
+        const channel = document.getElementById("channel").value;
+
+        const response = await fetch(`/api/guilds/${guildId}/welcome`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: title_value, description: description_value, channel: channel })
+        });
+    }
+</script>

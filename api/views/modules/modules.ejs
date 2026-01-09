@@ -1,0 +1,15 @@
+<div class="sidebar">
+    <h2><%= guild.name %></h2>
+    <button class="menu-toggle" id="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
+    <a href="/guilds/" class="nav-item"><span>🦈 サーバー選択</span></a>
+    <a href="/guilds/<%= guild.id %>" class="nav-item"><span>🏠 ホーム</span></a>
+
+    <% moduleList.forEach(mod => { %>
+        <a href="/guilds/<%= guild.id %>/<%= mod.pathname %>" class="nav-item"><span><%= mod.emoji %> <%= mod.name %></span></a>
+    <% }); %>
+</div>

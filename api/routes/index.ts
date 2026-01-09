@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { mongo } from "../../lib/mongo.js";
+import { modules } from "./../../bot/temps/modules.js";
+import { moduleManager } from "../../bot/moduleManager.js";
 
 export default async function (fastify: FastifyInstance) {
     fastify.get("/guilds", async (request, reply) => {
@@ -23,9 +25,8 @@ export default async function (fastify: FastifyInstance) {
         });
     });
 
-    fastify.get("/guilds/:guildId/", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {
-        const body = request.body as any;
-        const guildId = body?.guildId;
+    fastify.get("/guilds/:guildId", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {
+        const { guildId } = request.params as { guildId: string };
 
         const userId = request.session.get('userId');
         if (!userId) {
@@ -34,12 +35,22 @@ export default async function (fastify: FastifyInstance) {
 
         const dbUser = await mongo.db("DashboardBot").collection('GuildsList').findOne({ user: userId });
 
-        const guilds = dbUser?.guilds;
-        if (!guilds) return reply.status(401).send({ error: 'サーバーが見つかりません。' });
+        if (!dbUser || !dbUser.guilds) {
+            return reply.status(404).send({ error: 'サーバーリストが見つかりません。' });
+        }
 
-        const targetGuild = dbUser?.guilds?.find((g: any) => g.id === guildId);
-        if (!targetGuild) return reply.status(401).send({ error: 'サーバーが見つかりません。' });
+        const targetGuild = dbUser.guilds.find((g: any) => g.id === guildId);
+        
+        if (!targetGuild) {
+            return reply.status(403).send({ error: '指定されたサーバーへのアクセス権限がありません。' });
+        }
 
-        return reply.view("modules/module.ejs", { title: `${targetGuild.name} のモジュール` });
+        const moded_modules = moduleManager.getModulesList(guildId);
+
+        return reply.view("modules/module.ejs", { 
+            title: `${targetGuild.name} の設定`,
+            guild: targetGuild,
+            moduleList: moded_modules
+        });
     });
 }

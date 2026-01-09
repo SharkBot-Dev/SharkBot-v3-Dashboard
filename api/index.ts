@@ -25,12 +25,13 @@ export default async function buildServer() {
     fastify.register(authGuard);
     fastify.register(view);
 
+    fastify.register(indexRoutes, { prefix: "/" });
     fastify.register(moduleRoutes, { prefix: "/" });
 
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     fastify.register(autoLoad, {
-        dir: join(__dirname, 'routes'),
+        dir: join(__dirname, 'routes/modules'),
         options: { prefix: '/' }
     });
 
@@ -63,11 +64,11 @@ export default async function buildServer() {
     });
 
     // 404エラー対策
-    fastify.setNotFoundHandler((request, reply) => {
-        return reply.status(404).view('errors/404.ejs', {
-            title: "404"
-        });
-    });
+    // fastify.setNotFoundHandler((request, reply) => {
+    //     return reply.status(404).view('errors/404.ejs', {
+    //         title: "404"
+    //     });
+    // });
     
     return fastify;
 }

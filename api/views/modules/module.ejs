@@ -1,0 +1,88 @@
+<%- include('modules.ejs') %>
+
+<div class="main-content">
+    <header style="margin-bottom: 30px;">
+        <h1 style="margin: 0;"><%= title %></h1>
+        <p style="color: var(--text-muted); margin-top: 5px;">このサーバーで利用可能な機能の一覧です。</p>
+    </header>
+
+    <div class="card">
+        <h2 style="font-size: 1.2rem; margin-bottom: 20px;">モジュール一覧</h2>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <% if (locals.moduleList && moduleList.length > 0) { %>
+                <% moduleList.forEach(mod => { %>
+                    <% if (mod) { %>
+                        <a href="/guilds/<%= guild.id %>/<%= mod.pathname %>" 
+                           style="text-decoration: none; color: inherit; transition: transform 0.1s;"
+                           onmouseover="this.style.transform='scale(1.01)'" 
+                           onmouseout="this.style.transform='scale(1)'">
+                           
+                            <div class="module-item" style="display: flex; align-items: center; justify-content: space-between; padding: 18px; background: #36393f; border-radius: 8px; border: 1px solid transparent; transition: 0.2s;" 
+                                 onmouseover="this.style.borderColor='var(--primary-color)'" 
+                                 onmouseout="this.style.borderColor='transparent'">
+                                
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span style="font-size: 1.8rem;"><%= mod.emoji || '📦' %></span>
+                                    <div>
+                                        <div style="font-weight: bold; font-size: 1.1rem;"><%= mod.name %></div>
+                                        <% if (mod.description) { %>
+                                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                                                <%= mod.description %>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <label class="switch-container" style="position: relative; display: inline-block; width: 46px; height: 24px;">
+                                        <input type="checkbox" 
+                                            class="module-toggle" 
+                                            data-guild-id="<%= guild.id %>" 
+                                            data-module-path="<%= mod.pathname %>"
+                                            <%= mod.enabled ? 'checked' : '' %>
+                                            style="opacity: 0; width: 0; height: 0;">
+                                        <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #72767d; transition: .4s; border-radius: 24px;"></span>
+                                    </label>
+                                    <span class="status-text" style="font-size: 0.85rem; font-weight: bold; min-width: 35px; color: <%= mod.enabled ? 'var(--success)' : 'var(--text-muted)' %>">
+                                        <%= mod.enabled ? '有効' : '無効' %>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    <% } %>
+                <% }); %>
+            <% } else { %>
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    利用可能なモジュールが見つかりませんでした。
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+<script>
+document.querySelectorAll('.module-toggle').forEach(checkbox => {
+    checkbox.addEventListener('change', async (e) => {
+        const isEnabled = e.target.checked;
+        const guildId = e.target.dataset.guildId;
+        const moduleName = e.target.dataset.modulePath;
+        const statusText = e.target.parentElement.nextElementSibling;
+
+        statusText.innerText = isEnabled ? '有効' : '無効';
+        statusText.style.color = isEnabled ? 'var(--success)' : 'var(--text-muted)';
+
+        try {
+            const response = await fetch(`/api/modules/toggle`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guildId, module: moduleName })
+            });
+
+            if (!response.ok) throw new Error('保存に失敗しました');
+        } catch (err) {
+            alert('設定の保存中にエラーが発生しました');
+            e.target.checked = !isEnabled;
+            statusText.innerText = !isEnabled ? '有効' : '無効';
+        }
+    });
+});
+</script>

@@ -3,7 +3,9 @@ import type { ModuleType } from "./../type.js";
 import { moduleManager } from "./../../moduleManager.js";
 
 export default {
-    name: "testmodule",
+    name: "テストモジュール",
+    pathname: "testmodule",
+    emoji: "🛠️",
     description: "テスト用モジュール",
     enabled: true,
     events: [
