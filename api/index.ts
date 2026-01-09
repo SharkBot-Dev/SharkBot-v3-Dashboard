@@ -1,17 +1,33 @@
 import Fastify from "fastify";
 import moduleRoutes from "./routes/modules.js";
 import oauthPlugin, { fastifyOauth2, type FastifyOAuth2Options, type OAuth2Namespace } from '@fastify/oauth2';
+import autoLoad from '@fastify/autoload';
+import path, { join } from "path";
+import { mongo } from "../lib/mongo.js";
+import { fileURLToPath } from "url";
+import session from "./plugins/session.js";
+import discord from "./plugins/discord.js";
 
 declare module 'fastify' {
-  interface FastifyInstance {
-    discordOAuth2: OAuth2Namespace;
-  }
+    interface FastifyInstance {
+        discordOAuth2: OAuth2Namespace;
+    }
 }
 
 export default async function buildServer() {
     const fastify = Fastify({ logger: true });
 
     fastify.register(moduleRoutes, { prefix: "/api/modules" });
+
+    fastify.register(session);
+    fastify.register(discord);
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    fastify.register(autoLoad, {
+        dir: join(__dirname, 'routes'),
+        options: { prefix: '/' }
+    });
 
     // Oauth2認証
     fastify.register(fastifyOauth2, {
@@ -21,17 +37,24 @@ export default async function buildServer() {
             auth: fastifyOauth2.DISCORD_CONFIGURATION
         },
         startRedirectPath: '/login',
-        callbackUri: 'http://localhost:3000/callback',
+        callbackUri: process.env.REDIRECT_URI,
         scope: ['identify', 'guilds']
     } as FastifyOAuth2Options);
 
     fastify.get('/callback', async (request, reply) => {
         const { token } = await fastify.discordOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
-        
-        const userResponse = await fetch('https://discord.com/api/users/@me', {
-            headers: { authorization: `Bearer ${token.access_token}` },
-        });
-        return userResponse.json();
+        const user = await fastify.discordService.getUser(token.access_token);
+        const guilds = await fastify.discordService.getGuilds(token.access_token);
+
+        await mongo.db("DashboardBot").collection('GuildsList').updateOne(
+            { user: user.id },
+            { $set: { guilds: guilds, lastLogin: new Date() } },
+            { upsert: true }
+        );
+
+        request.session.set('userId', user.id);
+
+        return reply.redirect('/');
     });
     
     return fastify;

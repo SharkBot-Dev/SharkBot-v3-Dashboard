@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@fastify/autoload": "^6.3.1",
     "@fastify/oauth2": "^8.1.2",
+    "@fastify/secure-session": "^8.3.0",
     "discord.js": "^14.25.1",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",

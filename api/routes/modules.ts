@@ -4,7 +4,7 @@ import { moduleManager } from "./../../bot/moduleManager.js";
 export default async function (
   fastify: FastifyInstance
 ) {
-    fastify.post("/modules/toggle", async (req) => {
+    fastify.post("/api/modules/toggle", async (req) => {
         const { guildId, module } = req.body as any;
     
         const current = moduleManager.isEnabled(guildId, module);
