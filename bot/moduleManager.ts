@@ -34,7 +34,7 @@ export class ModuleManager {
     }
 
     isEnabled(guildId: GuildId, modulePath: ModulePath): boolean {
-        console.log(this.cache.get(guildId)?.get(modulePath) ?? false)
+        // console.log(this.cache.get(guildId)?.get(modulePath) ?? false)
         return this.cache.get(guildId)?.get(modulePath) ?? false;
     }
 

@@ -26,7 +26,7 @@ export default async function (fastify: FastifyInstance) {
         }
 
         const channels = await getChannels(guildId);
-        console.log(channels);
+        // console.log(channels);
 
         const moded_modules = moduleManager.getModulesList(guildId);
 
@@ -35,13 +35,18 @@ export default async function (fastify: FastifyInstance) {
             Guild: new Long(guildId)
         })
 
+        const path_name = "welcome"
+        const current = moduleManager.isEnabled(guildId, path_name);
+
         return reply.view("modules/welcome/module.ejs", { 
             title: `${targetGuild.name} の参加メッセージ`,
             guild: targetGuild,
             moduleList: moded_modules,
             msg_title: messages?.Title,
             msg_description: messages?.Description,
-            channels: channels
+            channels: channels,
+            path: path_name,
+            enabled: current
         });
     });
 
@@ -74,7 +79,7 @@ export default async function (fastify: FastifyInstance) {
             : channels;
 
         const exists = channelsData.some((c: any) => c.id === channel);
-        if (!exists) return;
+        if (!exists) return reply.status(403).send({ error: 'そのチャンネルは指定できません。' });
 
         const db = mongo.db("Main").collection("WelcomeMessage");
         await db.updateOne({
