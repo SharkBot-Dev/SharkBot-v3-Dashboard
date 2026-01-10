@@ -52,7 +52,6 @@ export default async function (fastify: FastifyInstance) {
 
     fastify.delete("/api/guilds/:guildId/welcome", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {
         const { guildId } = request.params as { guildId: string };
-        const { title, description, channel } = request.body as { title: string, description: string, channel: string };
 
         const userId = request.session.get('userId');
         if (!userId) {
