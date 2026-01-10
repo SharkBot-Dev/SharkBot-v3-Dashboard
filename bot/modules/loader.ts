@@ -4,6 +4,7 @@ import { Client } from 'discord.js';
 import type { ModuleType } from './type.js';
 import { fileURLToPath, pathToFileURL } from "url";
 import { addModules, modules } from "./../temps/modules.js";
+import { commands } from '../client.js';
 
 export async function loadModules(client: Client) {
     const __filename = fileURLToPath(import.meta.url);
@@ -43,7 +44,7 @@ export async function loadModules(client: Client) {
 
             if (botModule.commands) {
                 for (const cmd of botModule.commands) {
-                    (client as any).commands?.set(cmd.data.name, cmd);
+                    commands?.set(cmd.data.name, cmd);
                     console.log(`[Command] ${cmd.data.name} をロードしました。`);
                 }
             }
