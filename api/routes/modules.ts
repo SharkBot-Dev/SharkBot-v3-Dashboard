@@ -42,7 +42,13 @@ export default async function (fastify: FastifyInstance) {
 
             return { success: true };
         } else {
-            const cmd = await getCommand(guildId, module_commands.commands[0].data.name);
+            const targetCommand = module_commands.commands.find((c: any) => c.data.name === command);
+
+            if (!targetCommand) {
+                return reply.status(404).send({ error: 'コマンドが見つかりません。' });
+            }
+            
+            const cmd = await getCommand(guildId, targetCommand.data.name);
             if (cmd) {
                 await deleteCommands(guildId, cmd.id);
             }
