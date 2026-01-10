@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { mongo } from "../../../lib/mongo.js";
 import { moduleManager } from "../../../bot/moduleManager.js";
-import { addCommands, deleteCommands, getCommand, getCommands } from "./../../../lib/discord.js"
+import { addCommands, deleteCommands, getCommand, getCommandCooldownd, getCommands } from "./../../../lib/discord.js"
 import NodeCache from "node-cache";
 import { getModule, modules } from "./../../../bot/temps/modules.js";
 
@@ -33,7 +33,7 @@ export default async function (fastify: FastifyInstance) {
         const path_name = "help"
         const current = moduleManager.isEnabled(guildId, path_name);
 
-        const cmd = await getCommand(guildId, "help");
+        const cmd = await getCommandCooldownd(guildId, "help");
 
         return reply.view("modules/help/module.ejs", { 
             title: `${targetGuild.name} のヘルプ`,

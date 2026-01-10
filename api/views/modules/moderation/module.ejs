@@ -15,7 +15,7 @@
 
 <div class="main-content">
     <header style="margin-bottom: 30px;">
-        <h1 style="margin: 0;">ヘルプモジュール</h1><br/>
+        <h1 style="margin: 0;">モデレーションモジュール</h1><br/>
 
         <div style="display: flex; align-items: center; gap: 15px;">
             <label class="switch-container" style="position: relative; display: inline-block; width: 46px; height: 24px;">
@@ -36,24 +36,42 @@
 
     <div class="card">
         <div style="display: flex; align-items: center; gap: 15px;">
-            /help <label class="switch-container" style="position: relative; display: inline-block; width: 46px; height: 24px;">
+            /clear (メッセージを削除します。) <label class="switch-container" style="position: relative; display: inline-block; width: 46px; height: 24px;">
             <input type="checkbox" 
                 class="module-toggle" 
-                id="help_commands"
+                id="clear_commands"
                 data-guild-id="<%= guild.id %>" 
                 data-module-path="<%= path %>"
-                <%= help_command_enabled ? 'checked' : '' %>
+                <%= clear_commands_enabled ? 'checked' : '' %>
                 style="opacity: 0; width: 0; height: 0;">
             <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #72767d; transition: .4s; border-radius: 24px;"></span>
             </label>
             <span class="status-text" style="font-size: 0.85rem; font-weight: bold; min-width: 35px; color: <%= enabled ? 'var(--success)' : 'var(--text-muted)' %>">
-                <%= help_command_enabled ? '有効' : '無効' %>
+                <%= clear_commands_enabled ? '有効' : '無効' %>
+            </span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            /remake (チャンネルを再生成します。) <label class="switch-container" style="position: relative; display: inline-block; width: 46px; height: 24px;">
+            <input type="checkbox" 
+                class="module-toggle" 
+                id="remake_commands"
+                data-guild-id="<%= guild.id %>" 
+                data-module-path="<%= path %>"
+                <%= remake_commands_enabled ? 'checked' : '' %>
+                style="opacity: 0; width: 0; height: 0;">
+            <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #72767d; transition: .4s; border-radius: 24px;"></span>
+            </label>
+            <span class="status-text" style="font-size: 0.85rem; font-weight: bold; min-width: 35px; color: <%= enabled ? 'var(--success)' : 'var(--text-muted)' %>">
+                <%= remake_commands_enabled ? '有効' : '無効' %>
             </span>
         </div>
     </div>
 </div>
 <script>
-    document.getElementById("help_commands").addEventListener('change', async (e) => {
+    document.getElementById("clear_commands").addEventListener('change', async (e) => {
         const isEnabled = e.target.checked;
         const guildId = e.target.dataset.guildId;
         const moduleName = e.target.dataset.modulePath;
@@ -63,10 +81,34 @@
         statusText.style.color = isEnabled ? 'var(--success)' : 'var(--text-muted)';
 
         try {
-            const response = await fetch(`/api/guilds/${guildId}/help`, {
+            const response = await fetch(`/api/modules/commands`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ enabled: isEnabled })
+                body: JSON.stringify({ enabled: isEnabled, module: moduleName, command: "clear", guildId: guildId })
+            });
+
+            if (!response.ok) throw new Error('保存に失敗しました');
+        } catch (err) {
+            alert('リクエストが早すぎます。');
+            e.target.checked = !isEnabled;
+            statusText.innerText = !isEnabled ? '有効' : '無効';
+        }
+    });
+
+    document.getElementById("remake_commands").addEventListener('change', async (e) => {
+        const isEnabled = e.target.checked;
+        const guildId = e.target.dataset.guildId;
+        const moduleName = e.target.dataset.modulePath;
+        const statusText = e.target.parentElement.nextElementSibling;
+
+        statusText.innerText = isEnabled ? '有効' : '無効';
+        statusText.style.color = isEnabled ? 'var(--success)' : 'var(--text-muted)';
+
+        try {
+            const response = await fetch(`/api/modules/commands`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: isEnabled, module: moduleName, command: "remake", guildId: guildId })
             });
 
             if (!response.ok) throw new Error('保存に失敗しました');

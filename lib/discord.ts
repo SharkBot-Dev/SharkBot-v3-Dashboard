@@ -61,6 +61,18 @@ export async function getCommandsNoCooldown(guildId: string) {
     return data;
 }
 
+export async function getCommandCooldownd(guildId: string, name: string) {
+    const cmds = await getCommands(guildId);
+
+    for (const m of cmds) {
+        if (m.name === name) {
+            return m;
+        }
+    }
+
+    return undefined;
+}
+
 export async function getCommand(guildId: string, name: string) {
     const cmds = await getCommandsNoCooldown(guildId);
 

@@ -18,6 +18,10 @@ export class ModuleManager {
                 Object.entries(doc.enabled).forEach(([path, isEnabled]) => {
                     map.set(path, isEnabled as boolean);
                 });
+            } else {
+                Object.entries(!doc.enabled).forEach(([path, isEnabled]) => {
+                    map.set(path, isEnabled as boolean);
+                });
             }
             this.cache.set(doc._id, map);
         }
@@ -35,6 +39,12 @@ export class ModuleManager {
 
     isEnabled(guildId: GuildId, modulePath: ModulePath): boolean {
         // console.log(this.cache.get(guildId)?.get(modulePath) ?? false)
+        for (const mod of modules) {
+            if (mod.pathname !== modulePath) {
+                return this.cache.get(guildId)?.get(modulePath) ?? mod.enabled;
+            }
+        }
+
         return this.cache.get(guildId)?.get(modulePath) ?? false;
     }
 
