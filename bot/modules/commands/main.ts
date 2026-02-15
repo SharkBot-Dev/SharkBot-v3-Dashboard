@@ -4,7 +4,7 @@ import { moduleManager } from "./../../moduleManager.js";
 import { commands } from "../../client.js";
 
 export default {
-    name: "コマンドモジュール",
+    name: "コマンド",
     pathname: "commands",
     emoji: "💬",
     description: "スラッシュコマンドなどを使用できるようにします。",

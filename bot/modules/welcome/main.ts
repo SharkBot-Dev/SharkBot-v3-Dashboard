@@ -14,7 +14,7 @@ const replaceTexts = (text: string, member: GuildMember): string => {
 };
 
 export default {
-    name: "ようこそモジュール",
+    name: "ようこそ",
     pathname: "welcome",
     emoji: "😉",
     description: "メンバー参加時に挨拶をします。",

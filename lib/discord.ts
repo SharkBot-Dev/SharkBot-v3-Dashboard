@@ -4,6 +4,7 @@ import NodeCache from "node-cache";
 const DISCORD_API_URL = 'https://discord.com/api/v10';
 
 const discordChannelsCache = new NodeCache({ stdTTL: 600, checkperiod: 120 });
+const discordRolesCache = new NodeCache({ stdTTL: 600, checkperiod: 120 });
 const getSlashCommandCache = new NodeCache({ stdTTL: 30, checkperiod: 20 });
 
 export async function getChannels(guildId: string) {
@@ -23,6 +24,26 @@ export async function getChannels(guildId: string) {
     const data = await channel.json();
     
     discordChannelsCache.set(url, data);
+    return data;
+}
+
+export async function getRoles(guildId: string) {
+    const url = `${DISCORD_API_URL}/guilds/${guildId}/roles`;
+
+    const value = discordRolesCache.get(url);
+    if (value !== undefined) {
+        return value;
+    }
+
+    const channel = await fetch(url, {
+        headers: {
+            authorization: `Bot ${process.env.DISCORD_TOKEN}`
+        }
+    });
+
+    const data = await channel.json();
+    
+    discordRolesCache.set(url, data);
     return data;
 }
 
@@ -104,4 +125,25 @@ export async function deleteCommands(guildId: string, id: string) {
     );
 
     return;
+}
+
+export async function sendMessage(channelId: string, content: any) {
+    const url = `${DISCORD_API_URL}/channels/${channelId}/messages`;
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bot ${process.env.DISCORD_TOKEN}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(typeof content === 'string' ? { content } : content)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Discord API Error (sendMessage):", errorData);
+        throw new Error(`Failed to send message: ${response.statusText}`);
+    }
+
+    return await response.json();
 }

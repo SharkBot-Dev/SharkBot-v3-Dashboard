@@ -1,0 +1,156 @@
+<%- include('../modules.ejs') %>
+
+<style>
+    .card textarea {
+        width: 100%;
+        max-width: 400px;
+        height: 80px;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .card button {
+        background-color: #161f25;
+        color: white;
+        border-radius: 20px;
+        padding: 8px 20px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .role-selection-container {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #444;
+        padding: 10px;
+        border-radius: 5px;
+        background: #2f3136;
+        margin-bottom: 15px;
+    }
+
+    .role-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="main-content">
+    <header style="margin-bottom: 30px;">
+        <h1 style="margin: 0;">ロールパネル</h1><br/>
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <label class="switch-container" style="position: relative; display: inline-block; width: 46px; height: 24px;">
+                <input type="checkbox" 
+                    class="module-toggle" 
+                    id="module_setting"
+                    data-guild-id="<%= guild.id %>" 
+                    data-module-path="<%= path %>"
+                    <%= enabled ? 'checked' : '' %>
+                    style="opacity: 0; width: 0; height: 0;">
+                <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #72767d; transition: .4s; border-radius: 24px;"></span>
+            </label>
+            <span class="status-text" style="font-size: 0.85rem; font-weight: bold; min-width: 35px; color: <%= enabled ? 'var(--success)' : 'var(--text-muted)' %>">
+                <%= enabled ? '有効' : '無効' %>
+            </span>
+        </div>
+    </header>
+
+    <div class="card">
+        <h3>ロールパネルの作成</h3>
+
+        <h4>送信先チャンネル</h4>
+        <select id="channel" style="margin-bottom: 15px;">
+            <% channels.forEach(ch => { %>
+                <% /* type: 4 はカテゴリチャンネルを表します。0はテキスト、5はアナウンスです */ %>
+                <% if (ch.type !== 4) { %>
+                    <option value="<%= ch.id %>"># <%= ch.name %></option>
+                <% } %>
+            <% }); %>
+        </select>
+
+        <h4>付与するロールを選択</h4>
+        <div class="role-selection-container">
+            <% roles.forEach(role => { %>
+                <% if (role.name !== "@everyone") { %>
+                    <div class="role-item">
+                        <input type="checkbox" class="role-checkbox" id="role_<%= role.id %>" value="<%= role.id %>">
+                        <label for="role_<%= role.id %>" style="color: <%= role.hexColor %>;"><%= role.name %></label>
+                    </div>
+                <% } %>
+            <% }); %>
+        </div>
+
+        <h4>埋め込みのタイトル</h4>
+        <textarea id="rp_message_title" placeholder="役職を受け取る"><%= msg_title %></textarea>
+
+        <h4>埋め込みの説明</h4>
+        <textarea id="rp_message_description" placeholder="下のボタンを押すとロールが付与されます"><%= msg_description %></textarea>
+        
+        <br/>
+        <button onclick="sendRolePanel()">送信する</button>
+    </div>
+</div>
+
+<script>
+    async function sendRolePanel() {
+        const guildId = "<%= guild.id %>";
+        const title_value = document.getElementById("rp_message_title").value;
+        const description_value = document.getElementById("rp_message_description").value;
+        const channel = document.getElementById("channel").value;
+
+        const selectedRoles = Array.from(document.querySelectorAll('.role-checkbox:checked'))
+                                   .map(cb => cb.value);
+
+        if (selectedRoles.length === 0) {
+            alert("ロールを少なくとも1つ選択してください。");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/guilds/${guildId}/rolepanel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    title: title_value, 
+                    description: description_value, 
+                    channel: channel,
+                    roles: selectedRoles
+                })
+            });
+
+            if (response.ok) {
+                alert("ロールパネルを送信しました！");
+            } else {
+                throw new Error();
+            }
+        } catch (err) {
+            alert("送信に失敗しました。");
+        }
+    }
+
+    document.getElementById("module_setting").addEventListener('change', async (e) => {
+        const isEnabled = e.target.checked;
+        const guildId = e.target.dataset.guildId;
+        const moduleName = e.target.dataset.modulePath;
+        const statusText = e.target.parentElement.nextElementSibling;
+
+        statusText.innerText = isEnabled ? '有効' : '無効';
+        statusText.style.color = isEnabled ? 'var(--success)' : 'var(--text-muted)';
+
+        try {
+            const response = await fetch(`/api/modules/toggle`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guildId, module: moduleName })
+            });
+
+            if (!response.ok) throw new Error('保存に失敗しました');
+        } catch (err) {
+            alert('設定の保存中にエラーが発生しました');
+            e.target.checked = !isEnabled;
+            statusText.innerText = !isEnabled ? '有効' : '無効';
+        }
+    });
+</script>

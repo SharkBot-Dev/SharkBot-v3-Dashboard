@@ -2,14 +2,20 @@
 
 <style>
     .card textarea {
-        width: 80px;
-        height: 50px;
+        width: 100%;
+        max-width: 400px;
+        height: 80px;
+        display: block;
+        margin-bottom: 10px;
     }
 
     .card button {
         background-color: #161f25;
         color: white;
         border-radius: 20px;
+        padding: 8px 20px;
+        cursor: pointer;
+        border: none;
     }
 </style>
 
@@ -41,9 +47,12 @@
 
         <p>
             <h4>送信先チャンネル</h4>
-            <select id="channel">
+            <select id="channel" style="margin-bottom: 15px;">
                 <% channels.forEach(ch => { %>
-                    <option value="<%= ch.id %>"><%= ch.name %></option>
+                    <% /* type: 4 はカテゴリチャンネルを表します。0はテキスト、5はアナウンスです */ %>
+                    <% if (ch.type !== 4) { %>
+                        <option value="<%= ch.id %>"># <%= ch.name %></option>
+                    <% } %>
                 <% }); %>
             </select>
             <h4>埋め込みのタイトル</h4>

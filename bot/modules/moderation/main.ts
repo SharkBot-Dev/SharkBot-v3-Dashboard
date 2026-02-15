@@ -4,7 +4,7 @@ import { error_embed, success_embed } from "./../../../lib/make_embed.js"
 import { sleep } from "../../../lib/sleep.js";
 
 export default {
-    name: "モデレートモジュール",
+    name: "モデレーター",
     pathname: "moderation",
     emoji: "🔨",
     description: "メンバーを処罰するコマンドを追加します",

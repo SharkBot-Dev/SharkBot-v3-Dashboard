@@ -3,7 +3,7 @@ import type { ModuleType } from "./../type.js";
 import { moduleManager } from "./../../moduleManager.js";
 
 export default {
-    name: "テストモジュール",
+    name: "テスト",
     pathname: "testmodule",
     emoji: "🛠️",
     description: "テスト用モジュール",

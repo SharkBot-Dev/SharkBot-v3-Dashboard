@@ -60,7 +60,7 @@ export default async function buildServer() {
 
         request.session.set('userId', user.id);
 
-        return reply.redirect('/');
+        return reply.redirect('/guilds');
     });
 
     // 404エラー対策

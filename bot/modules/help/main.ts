@@ -3,7 +3,7 @@ import type { ModuleType } from "./../type.js";
 import { modules } from "./../../temps/modules.js";
 
 export default {
-    name: "ヘルプモジュール",
+    name: "ヘルプ",
     pathname: "help",
     emoji: "❓",
     description: "コマンドの使い方を調べられます。",
