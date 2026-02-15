@@ -1,6 +1,7 @@
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 import type { ModuleType } from "./../type.js";
 import { modules } from "./../../temps/modules.js";
+import { moduleManager } from "../../moduleManager.js";
 
 export default {
     name: "ヘルプ",
@@ -15,6 +16,18 @@ export default {
                 .setName("help")
                 .setDescription("ヘルプを表示します。"),
             execute: async (interaction: ChatInputCommandInteraction) => {
+                if (!interaction.guild) {
+                    return;
+                }
+
+                if (!moduleManager.isEnabled(interaction.guild.id, "help")) {
+                    await interaction.reply({
+                        content: 'ヘルプモジュールが無効化されています。\n\nダッシュボードで設定を確認してください。\nhttps://dashboard.sharkbot.xyz/',
+                        flags: MessageFlags.Ephemeral,
+                    })
+                    return;
+                };
+
                 await interaction.deferReply();
 
                 const embed = new EmbedBuilder()
@@ -44,6 +57,29 @@ export default {
                 }
 
                 await interaction.editReply({ embeds: [embed] });
+            }
+        },
+        {
+            data: new SlashCommandBuilder()
+                .setName("dashboard")
+                .setDescription("ダッシュボードのリンクを取得します。"),
+            execute: async (interaction: ChatInputCommandInteraction) => {
+                if (!interaction.guild) {
+                    return;
+                }
+
+                if (!moduleManager.isEnabled(interaction.guild.id, "help")) {
+                    await interaction.reply({
+                        content: 'ヘルプモジュールが無効化されています。\n\nダッシュボードで設定を確認してください。\nhttps://dashboard.sharkbot.xyz/',
+                        flags: MessageFlags.Ephemeral,
+                    })
+                    return;
+                };
+
+                    await interaction.reply({
+                        content: '以下からアクセスできます。\nhttps://dashboard.sharkbot.xyz/',
+                        flags: MessageFlags.Ephemeral,
+                    })
             }
         }
     ]

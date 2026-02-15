@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { mongo } from "../../../lib/mongo.js";
 import { moduleManager } from "../../../bot/moduleManager.js";
 import { getChannels, getRoles, sendMessage } from "./../../../lib/discord.js"
+import { Colors } from "discord.js";
 
 export default async function (fastify: FastifyInstance) {
     fastify.get("/guilds/:guildId/rolepanel", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {
@@ -71,23 +72,28 @@ export default async function (fastify: FastifyInstance) {
         }
 
         try {
-            const buttons = validRoles.slice(0, 5).map(roleId => ({
-                type: 2,
-                style: 1,
-                label: guildRoles.find((r: any) => r.id === roleId)?.name || "Role",
-                custom_id: `rolepanel_v1+${roleId}`
-            }));
+            const roleChunks = [];
+            for (let i = 0; i < validRoles.length; i += 5) {
+                roleChunks.push(validRoles.slice(i, i + 5));
+            }
+
+            const components = roleChunks.map(chunk => ({
+                type: 1,
+                components: chunk.map(roleId => ({
+                    type: 2, 
+                    style: 1,
+                    label: guildRoles.find((r: any) => r.id === roleId)?.name || "Role",
+                    custom_id: `rolepanel_v1+${roleId}`
+                }))
+            })).slice(0, 5);
 
             await sendMessage(channel, {
                 embeds: [{
                     title: title || "ロールパネル",
                     description: description || "ボタンを押してロールを取得",
-                    color: 0x5865F2
+                    color: Colors.Green
                 }],
-                components: buttons.length > 0 ? [{
-                    type: 1,
-                    components: buttons
-                }] : []
+                components: components
             });
 
             await cooldownCollection.updateOne(

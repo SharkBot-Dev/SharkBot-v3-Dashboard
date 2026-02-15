@@ -2,7 +2,6 @@ import type { FastifyInstance } from "fastify";
 import { mongo } from "../../../lib/mongo.js";
 import { moduleManager } from "../../../bot/moduleManager.js";
 import { getCommand, getCommandCooldownd } from "./../../../lib/discord.js"
-import NodeCache from "node-cache";
 
 export default async function (fastify: FastifyInstance) {
     fastify.get("/guilds/:guildId/moderation", { preHandler: [fastify.authGuard.checkAdmin] }, async (request, reply) => {

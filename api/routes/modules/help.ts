@@ -33,7 +33,8 @@ export default async function (fastify: FastifyInstance) {
         const path_name = "help"
         const current = moduleManager.isEnabled(guildId, path_name);
 
-        const cmd = await getCommandCooldownd(guildId, "help");
+        const help_cmd = await getCommandCooldownd(guildId, "help");
+        const dashboard_cmd = await getCommandCooldownd(guildId, "dashboard");
 
         return reply.view("modules/help/module.ejs", { 
             title: `${targetGuild.name} のヘルプ`,
@@ -41,7 +42,8 @@ export default async function (fastify: FastifyInstance) {
             moduleList: moded_modules,
             path: path_name,
             enabled: current,
-            help_command_enabled: true? cmd : false
+            help_command_enabled: true? help_cmd : false,
+            dashboard_command_enabled: true? dashboard_cmd : false
         });
     });
 

@@ -17,12 +17,19 @@ export default {
                     return;
                 }
 
-                if (!interaction.guild) return;
                 if (!interaction.isChatInputCommand()) return;
+
+                if (!interaction.guild) {
+                    await interaction.reply({
+                        content: "コマンドはDMで実行できません。",
+                        flags: MessageFlags.Ephemeral,
+                    });
+                    return;
+                }
 
                 if (!moduleManager.isEnabled(interaction.guild.id, "commands")) {
                     await interaction.reply({
-                        content: 'コマンドモジュールが無効化されています。',
+                        content: 'コマンドモジュールが無効化されています。\n\nダッシュボードで設定を確認してください。\nhttps://dashboard.sharkbot.xyz/',
                         flags: MessageFlags.Ephemeral,
                     })
                     return;
