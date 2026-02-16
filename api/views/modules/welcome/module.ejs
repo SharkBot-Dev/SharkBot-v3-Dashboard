@@ -49,7 +49,6 @@
             <h4>送信先チャンネル</h4>
             <select id="channel" style="margin-bottom: 15px;">
                 <% channels.forEach(ch => { %>
-                    <% /* type: 4 はカテゴリチャンネルを表します。0はテキスト、5はアナウンスです */ %>
                     <% if (ch.type !== 4) { %>
                         <option value="<%= ch.id %>"># <%= ch.name %></option>
                     <% } %>

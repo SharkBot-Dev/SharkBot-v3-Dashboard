@@ -14,12 +14,8 @@ export class ModuleManager {
 
         for (const doc of docs) {
             const map = new Map<ModulePath, boolean>();
-            if (doc.enabled) {
+            if (doc.enabled && typeof doc.enabled === 'object') {
                 Object.entries(doc.enabled).forEach(([path, isEnabled]) => {
-                    map.set(path, isEnabled as boolean);
-                });
-            } else {
-                Object.entries(!doc.enabled).forEach(([path, isEnabled]) => {
                     map.set(path, isEnabled as boolean);
                 });
             }
@@ -28,31 +24,21 @@ export class ModuleManager {
     }
 
     getModulesList(guildId: string): any[] {
-        return modules.map((value) => {
-            const mod = { ...value };
-            
-            mod.enabled = this.cache.get(guildId)?.get(value.pathname) ?? value.enabled;
-            
-            return mod;
-        });
+        return modules.map((value) => ({
+            ...value,
+            enabled: this.cache.get(guildId)?.get(value.pathname) ?? value.enabled
+        }));
     }
 
     isEnabled(guildId: GuildId, modulePath: ModulePath): boolean {
-        // console.log(this.cache.get(guildId)?.get(modulePath) ?? false)
-        for (const mod of modules) {
-            if (mod.pathname !== modulePath) {
-                return this.cache.get(guildId)?.get(modulePath) ?? mod.enabled;
-            }
-        }
+        const cachedValue = this.cache.get(guildId)?.get(modulePath);
+        if (cachedValue !== undefined) return cachedValue;
 
-        return this.cache.get(guildId)?.get(modulePath) ?? false;
+        const defaultMod = modules.find(m => m.pathname === modulePath);
+        return defaultMod?.enabled ?? false;
     }
 
-    async set(
-        guildId: GuildId,
-        modulePath: ModulePath,
-        enabled: boolean
-    ) {
+    async set(guildId: GuildId, modulePath: ModulePath, enabled: boolean) {
         if (!this.cache.has(guildId)) {
             this.cache.set(guildId, new Map());
         }
@@ -63,7 +49,7 @@ export class ModuleManager {
             { _id: guildId },
             {
                 $set: {
-                    [`enabled.${modulePath}`]: enabled,
+                    [`enabled.${modulePath.replace(/\./g, '_')}`]: enabled,
                     updatedAt: new Date()
                 }
             },

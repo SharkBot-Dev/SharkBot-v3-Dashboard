@@ -48,6 +48,11 @@ export default {
                 const lastXpAt = userStats.last_xp_at ? Number(userStats.last_xp_at) : 0;
                 if (now - lastXpAt < cooldown) return;
 
+                const level_config = mongo.db("DashboardBot").collection("LevelsConfig");
+                const levelConfig = await level_config.findOne({
+                    guild_id: new Long(message.guild.id)
+                });
+
                 let { xp, level } = userStats;
                 const xpToAdd = getRandomInt(15, 25);
                 xp += xpToAdd;
@@ -58,7 +63,26 @@ export default {
                     level++;
                     xp -= neededXp; 
 
-                    await message.reply(`GG ${message.author}, レベル **${level}** に上がったよ！`);
+                    if (levelConfig) {
+                        let title: string = levelConfig.message_title;
+                        let description: string = levelConfig.message_description;
+
+                        let replaced_title: string = title.replaceAll("{user}", message.author.username).replaceAll("{level}", `${level}`);
+                        let replaced_description: string = description.replaceAll("{description}", message.author.username).replaceAll("{level}", `${level}`);
+
+                        if (levelConfig.message_sendtype == "channel") {
+                            const message_channel = message.guild.channels.cache.get(`${levelConfig.message_channel_id}`)
+                            if (message_channel?.isSendable()) {
+                                await message_channel.send({
+                                    embeds: [new EmbedBuilder().setTitle(replaced_title).setDescription(replaced_description).setColor(Colors.Green)]
+                                })
+                            }
+                        } else if (levelConfig.message_sendtype == "reply") {
+                            await message.reply({
+                                embeds: [new EmbedBuilder().setTitle(replaced_title).setDescription(replaced_description).setColor(Colors.Green)]
+                            })
+                        }
+                    }
                 }
 
                 await db.updateOne(
@@ -83,6 +107,15 @@ export default {
             execute: async (interaction: ChatInputCommandInteraction) => {
                 if (interaction.member == null) return;
                 if (interaction.channel == null) return;
+                if (interaction.guild == null) return;
+
+                if (!moduleManager.isEnabled(interaction.guild.id, "levels")) {
+                    await interaction.reply({
+                        content: 'レベルモジュールが無効化されています。\n\nダッシュボードで設定を確認してください。\nhttps://dashboard.sharkbot.xyz/',
+                        flags: MessageFlags.Ephemeral,
+                    })
+                    return;
+                };
 
                 const user = interaction.options.getUser("user");
                 await interaction.deferReply();
